@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup Page</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.976.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script>
+
+    AWS.config.region = 'us-east-1';
+
+    function signUp() {
+       var email = document.getElementById("email").value;
+       var username = document.getElementById("username").value;
+       var password = document.getElementById("password").value;
+       var userPoolId = 'us-east-1_UzpG3hrih';
+       var clientId = '3icblj07pcc8lktoogekq0veag';
+      
+       var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
+          
+       var params = {
+         ClientId: clientId,
+         Username: username,
+         Password: password,
+         UserAttributes: [
+           {
+             Name: 'email',
+             Value: email
+           }
+         ]
+       };
+    
+       cognitoIdentityServiceProvider.signUp(params, function(err, data) {
+         if (err) {
+           console.log("Error:", err);
+           return;
+         }
+         console.log("Success! User registered:", data.UserSub);
+         alert("Signup successful! Please wait for our administrators to verify your account. Make sure to join our discord.");
+       });
+    }
+
+    function verifyEmail() {
+      var email = document.getElementById("email").value;
+      var username = document.getElementById("username").value;
+      var verificationCode = document.getElementById("verificationCode").value;
+      var userPoolId = 'us-east-1_UzpG3hrih';
+      var clientId = '3icblj07pcc8lktoogekq0veag';
+
+      var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
+
+      var params = {
+        ClientId: clientId,
+        ConfirmationCode: verificationCode,
+        Username: username,
+
+      };
+
+      cognitoIdentityServiceProvider.confirmSignUp(params, function(err, data) {
+        if (err) {
+          console.log("Error:", err);
+          return;
+        }
+        console.log("Email verification successful!");
+        alert("Email verification successful! You can now sign in.");
+        window.location.href = 'index.html';
+
+      });
+    }
+    
+    
+    function calculateSecretHash(clientId, clientSecret, username) {
+      const message = username + clientId;
+      const hmac = CryptoJS.HmacSHA256(message, clientSecret);
+      return CryptoJS.enc.Base64.stringify(hmac);
+    }
+
+  
+
+  </script>
+</head>
+<body>
+  <h1>Signup</h1>
+  <form id="signupForm" onsubmit="event.preventDefault(); signUp();">
+    <label for="username">Username:</label>
+    <input type="username" id="username" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <h1>Verify Email</h1>
+  <form id="verificationForm" onsubmit="event.preventDefault(); verifyEmail();">
+    <label for="verificationCode">Verification Code:</label>
+    <input type="text" id="verificationCode" required>
+    <button type="submit">Verify Email</button>
+  </form>
+  
+</body>
+</html>

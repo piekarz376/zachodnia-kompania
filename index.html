@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Index Page</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.976.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+  <h1>Witaj w zachodniej Kompani!</h1>
+
+  <script>
+    // Configure AWS SDK with your region and credentials
+    AWS.config.region = 'us-east-1';
+
+    function validateToken() {
+        var userPoolId = 'us-east-1_UzpG3hrih';
+      var clientId = '3icblj07pcc8lktoogekq0veag';
+
+      var poolData = {
+        UserPoolId: userPoolId,
+        ClientId: clientId
+      };
+
+      var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+      var cognitoUser = userPool.getCurrentUser();
+
+      if (cognitoUser !== null) {
+        cognitoUser.getSession(function(err, session) {
+          if (err) {
+            console.log("Error:", err);
+            // Redirect to login page
+            window.location.href = 'signin.html';
+          } else {
+            console.log("Session valid!");
+            // User is authenticated, you can perform additional actions here
+
+            // Example: Retrieve user attributes
+            cognitoUser.getUserAttributes(function(err, attributes) {
+              if (err) {
+                console.log("Error:", err);
+              } else {
+                console.log("User attributes:", attributes);
+              }
+            });
+          }
+        });
+      } else {
+        console.log("User not authenticated");
+        // Redirect to login page
+        window.location.href = 'signin.html';
+      }
+    }
+
+    // Call the token validation function on page load
+    window.onload = function() {
+      validateToken();
+    };
+
+  </script>
+</body>
+</html>

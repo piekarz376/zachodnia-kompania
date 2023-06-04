@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.976.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js/dist/amazon-cognito-identity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="loginForm" onsubmit="event.preventDefault(); login();">
+    <label for="username">Username:</label>
+    <input type="text" id="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+    <button type="submit">Login</button>
+    <br>
+    <button onclick="window.location.href = 'signup.html';">Register</button>
+  </form>
+
+  <script>
+    // Configure AWS SDK with your region and credentials
+    AWS.config.region = 'us-east-1';
+
+    function setCookie(name, value, days) {
+      var expires = "";
+
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+
+      document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    }
+
+    function login() {
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+      var userPoolId = 'us-east-1_UzpG3hrih';
+      var clientId = '3icblj07pcc8lktoogekq0veag';
+
+
+var authenticationData = {
+  Username: username,
+  Password: password,
+};
+
+var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+
+var poolData = {
+  UserPoolId: userPoolId,
+  ClientId: clientId,
+};
+
+var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+var userData = {
+  Username: username,
+  Pool: userPool,
+};
+
+var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+
+cognitoUser.authenticateUser(authenticationDetails, {
+  onSuccess: function(result) {
+    console.log("Success! Access token:", result.getAccessToken().getJwtToken());
+    console.log("ID token:", result.getIdToken().getJwtToken());
+    console.log("Refresh token:", result.getRefreshToken().getToken());
+
+    // Store the tokens in secure HTTP-only cookie
+          var accessToken = result.getAccessToken().getJwtToken();
+          var idToken = result.getIdToken().getJwtToken();
+          var refreshToken = result.getRefreshToken().getToken();
+
+          // Set the cookies
+          setCookie('accessToken', accessToken, 7);
+          setCookie('idToken', idToken);
+          setCookie('refreshToken', refreshToken);
+
+          // Redirect to index.html
+          window.location.href = 'index.html';
+
+  },
+  onFailure: function(err) {
+    console.log("Error:", err);
+    alert("No chyba nie.");
+  },
+});
+}
+
+</script>
+</body>
+</html>
